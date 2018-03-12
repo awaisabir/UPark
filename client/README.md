@@ -1,5 +1,7 @@
 # COMP4601 - Front End
 
+
+### Structure
 ```
   .
   +-- src
