@@ -1,2 +1,4 @@
 server/node_modules
 data
+.vscode
+node_modules
