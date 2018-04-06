@@ -1,0 +1,13 @@
+{
+  "name": "comp4601-projet",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "express": "^4.16.3",
+    "mapbox": "^1.0.0-beta9",
+    "mongoose": "^5.0.13",
+    "node-csv": "^0.1.2"
+  }
+}
