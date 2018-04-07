@@ -1,6 +1,8 @@
-const express = require('express');
-const PORT = process.env.PORT || 3000;
+const express  = require('express');
 
+const Crawler = require('./models/Crawler');
+
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.listen(err => {
