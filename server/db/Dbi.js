@@ -20,8 +20,7 @@ class MongoInterface {
     return new Promise((resolve, reject) => {
       this._collection.findOne(query).then(file => {
         if (file) resolve(true);
-        
-        return resolve(false);
+        else resolve(false);
       }).catch(err => reject(new Error('Something went wrong with the call')));
     });
   }
