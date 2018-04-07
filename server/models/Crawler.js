@@ -8,7 +8,7 @@ class Crawler {
     this.c   = new BaseCrawler({
       maxConnections : 10,
       encoding : null,
-      callback : (error, res, done) => {
+      callback : async (error, res, done) => {
         if(error) {
             console.log(error);
         } else {
@@ -31,10 +31,10 @@ class Crawler {
             for (let datalink of parkingTickets[0].datalinks) {
               const { link } = datalink;
 
-              MongoInterface.insertFile(link, (err, result) => {
-                if (err) console.log(err);
-                else console.log('File(s) Inserted');
-              });
+              try {
+                let fileStatus = await MongoInterface.insertFile(link);
+                console.log('File(s) Inserted');
+              } catch(err) { console.log(err); }
             }
           }
         }

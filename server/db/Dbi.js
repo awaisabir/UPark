@@ -18,16 +18,17 @@ class MongoInterface {
     return this._collection.findOne({url});
   }
 
-  async insertFile(url, callback) {
-    try {
-      let result = await this._doesFileExist(url);
-      if (result) 
-        callback('File exists', null);
-      else {
-        let file = await this._collection.insert({url});
-        callback(null, file);
-      }
-    } catch (err) { callback(err, null); }
+  insertFile(url) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let result = await this._doesFileExist(url);
+        if (result) reject('File exists');
+        else {
+          let file = await this._collection.insert({url});
+          resolve(file)
+        }
+      } catch (err) { reject(err); }
+    });
   }
 }
 
