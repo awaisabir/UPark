@@ -1,7 +1,7 @@
 const fs             = require("fs");
 const unzip          = require("unzip");
 const BaseCrawler    = require('crawler');
-const MongoInterface = require('../db/Dbi');
+const DBInterface    = require('../db/Dbi');
 
 class Crawler {
   constructor() {
@@ -32,7 +32,7 @@ class Crawler {
               const { link } = datalink;
 
               try {
-                let fileStatus = await MongoInterface.insertFile(link);
+                let fileStatus = await DBInterface.insertFile(link);
                 console.log('File(s) Inserted');
               } catch(err) { console.log(err); }
             }
