@@ -1,5 +1,4 @@
 const DB_CONFIG = require('../config/db');
-const MongoClient = require('mongodb').MongoClient;
 const sqlite = require('sqlite3').verbose();
 
 // MongoDB Singleton
@@ -32,8 +31,8 @@ class DBInterface {
     // call this function to drop the whole database
   }
   
+  // does my file exist
   _doesFileExist(url) {
-    // does my file exist
     const SQL = `SELECT * FROM Files WHERE Url = ?`;
 
     return new Promise((resolve, reject) => {
@@ -46,8 +45,8 @@ class DBInterface {
     });
   }
 
+  // use does my file exist to insert file or not
   insertFile(url) {
-    // use does my file exist to insert file or not
     return new Promise(async (resolve, reject) => {
       try {
         let existenceOfFile = await this._doesFileExist(url);
