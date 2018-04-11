@@ -5,7 +5,7 @@ const sqlite = require('sqlite3').verbose();
 class DBInterface {
   constructor() {
     if(!DBInterface.instance) {
-      this._db = new sqlite.Database('../db/prod.db', sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE, err => {
+      this._db = new sqlite.Database(`${__dirname}/prod.db`, sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE, err => {
         if (err) throw err.message;
 
         console.log('DB Connection established');

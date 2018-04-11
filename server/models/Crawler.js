@@ -4,7 +4,7 @@ const BaseCrawler    = require('crawler');
 const DBInterface    = require('../db/Dbi');
 
 class Crawler {
-  constructor() {
+  constructor(cb) {
     this.c   = new BaseCrawler({
       maxConnections : 10,
       encoding : null,
@@ -15,6 +15,7 @@ class Crawler {
           let { $, body, options } = res;
           
           if (res.headers['content-type'] === 'application/zip') {
+            console.log('adding to data folder');
             let filepath = "./data/"+(new RegExp(".*/(.*\.zip)").exec(options.uri)[1]);
             fs.createWriteStream(filepath).write(body, err => {
                 if(err){
@@ -33,12 +34,14 @@ class Crawler {
 
               try {
                 let fileStatus = await DBInterface.insertFile(link);
-                console.log('File(s) Inserted');
+                this.addToQueue(link);
+                console.log(link + ' File(s) Inserted');
               } catch(err) { console.log(err); }
             }
           }
         }
-
+        if(this.c.queue.length < 1)
+          cb();
         done();
       }
     });
@@ -49,7 +52,4 @@ class Crawler {
   }
 }
 
-let c = new Crawler();
-c.addToQueue("https://www.toronto.ca/ext/open_data/catalog/delivery/open_data_catalog.json");
-
-// module.exports = Crawler
+ module.exports = Crawler
