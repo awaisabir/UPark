@@ -16,12 +16,12 @@ class Crawler {
           
           if (res.headers['content-type'] === 'application/zip') {
             console.log('adding to data folder');
-            let filepath = "./data/"+(new RegExp(".*/(.*\.zip)").exec(options.uri)[1]);
+            let filepath = `${__dirname}/../../data/${(new RegExp(".*/(.*\.zip)").exec(options.uri)[1])}`;
             fs.createWriteStream(filepath).write(body, err => {
                 if(err){
                   console.log(err);
                 } else {
-                  fs.createReadStream(filepath).pipe(unzip.Extract({ path: './data'}));
+                  fs.createReadStream(filepath).pipe(unzip.Extract({ path: `${__dirname}/../../data/`}));
                   fs.unlink(filepath);
                 }
               });
@@ -40,8 +40,11 @@ class Crawler {
             }
           }
         }
-        if(this.c.queue.length < 1)
-          cb();
+
+        console.log(this.c.queue.length);
+        // if(this.c.queue.length < 1)
+        //   cb();
+
         done();
       }
     });
