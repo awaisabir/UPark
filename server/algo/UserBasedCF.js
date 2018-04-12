@@ -32,6 +32,8 @@ class UserBasedCF {
    * @returns : the predicted value
    */
   _computeUserBasedPrediction(userIndex, itemIndex) {
+    if(this.matrix[userIndex][itemIndex] != -1)
+      return this.matrix[userIndex][itemIndex];
     const average = this._computeUserBasedAverage(this.matrix[userIndex]);
 
     let numerator = 0;
@@ -46,7 +48,8 @@ class UserBasedCF {
 				}
 			}
 		}
-		
+    if (denominator == 0 )
+      denominator = 1;
 		return average + (numerator / denominator);
   }
 
@@ -101,5 +104,4 @@ class UserBasedCF {
     return total / size;
   }
 }
-
-module.exports = CollaborativFiltering;
+module.exports = UserBasedCF;
