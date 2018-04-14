@@ -23,31 +23,35 @@ class App extends Component {
     const { lat, long } = this.state;
     (async () => {
       try {
-        let raw = await fetch(`http://localhost:3300/best/${lat}/${long}`);
+        let raw = await fetch(`http://localhost:3000/best/${lat}/${long}`);
         let response = await raw.json();
   
-        const { coords, success } = response;
+        const { value, success } = response;
   
-        this.setState({fetched: true, coords, success, err: {}});
+        this.setState({fetched: true, coords: value, success, err: {}});
       } catch (err) {
-        this.setState({fetched: false, coords: [], success, err});
+        this.setState({fetched: true, coords: [], success: false, err});
       }
     })();
   }
 
   updateCoords(long, lat) {
-    const coords = {lat, long};
     this.setState({lat, long});
   }
 
   render() {
-    const { lat, long } = this.state;
+    const { lat, long, coords } = this.state;
+
     return (
       <Container className="App">
         <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
         <p><strong>Latitude: </strong>{lat}, <strong>Longitude: </strong>{long}</p>
         <div className="map">
-          <Mapbox onMapClick={this.updateCoords}/>
+          <Mapbox 
+            onMapClick={this.updateCoords}
+            coords={coords}
+            currentLocation={{lat, long}}
+          />
         </div>
       </Container>
     );

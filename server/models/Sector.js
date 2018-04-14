@@ -55,7 +55,6 @@ class Sector {
                             for (let j = 0; j < this.cm.longs.length-1; j++)
                                 if(this.pricematrix[i][j] != -1)
                                     count ++;
-                        console.log(count + " " + bounds*(this.cm.lats.length*this.cm.longs.length) + " " + bounds);
                         // if the unknowns are manageable
                         if(count + 20 > bounds*(this.cm.lats.length*this.cm.longs.length)){
                             goodMatrix = true;

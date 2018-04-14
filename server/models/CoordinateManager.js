@@ -12,8 +12,6 @@ class CoordinateManager {
         let maxLat      = this._getMax(newCoord, 'Lat');
         let minLong     = this._getMin(newCoord, 'Long');
         let maxLong     = this._getMax(newCoord, 'Long');
-        // console.log(minLat + " " + maxLat);
-        // console.log(minLong + " " + maxLong);
         
         let latFactor   = (maxLat - minLat)/(numberOfQuadrants - 1);
         let longFactor  = (maxLong - minLong)/(numberOfQuadrants - 1);

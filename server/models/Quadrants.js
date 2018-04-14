@@ -18,7 +18,6 @@ class Quadrant {
     
         for(let coordinate of testCoords) {
             let weight = 1;//request the database for the number of tickets issued at the location / the cost of tickets at the location
-            console.log(coordinate + ", " + coordMan.getLatIndex(coordinate.lat) + " : " + coordMan.getLongIndex(coordinate.long));
             matrix[coordMan.getLatIndex(coordinate.lat)][coordMan.getLongIndex(coordinate.long)] += weight;
         }
     }
