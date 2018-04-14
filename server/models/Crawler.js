@@ -15,7 +15,6 @@ class Crawler {
           let { $, body, options } = res;
           
           if (res.headers['content-type'] === 'application/zip') {
-            console.log('adding to data folder');
             let filepath = `${__dirname}/../../data/${(new RegExp(".*/(.*\.zip)").exec(options.uri)[1])}`;
             fs.createWriteStream(filepath).write(body, err => {
                 if(err){
@@ -35,15 +34,10 @@ class Crawler {
               try {
                 let fileStatus = await DBInterface.insertFile(link);
                 this.addToQueue(link);
-                console.log(link + ' File(s) Inserted');
               } catch(err) { console.log(err); }
             }
           }
         }
-
-        console.log(this.c.queue.length);
-        // if(this.c.queue.length < 1)
-        //   cb();
 
         done();
       }

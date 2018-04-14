@@ -1,32 +1,37 @@
-/**
- * This is the index file for all routes
- * -> import all route files here and export index
- */
 const express = require('express');
+const router = express.Router();
+
 const Crawler = require('../models/Crawler');
 const CSVParser = require('../models/CSVParser');
 const UserBasedCF = require('../algo/UserBasedCF');
-const router = express.Router();
+const Dbi = require('../db/Dbi');
 
 router.get('/', (req, res) => res.send('Awais Qureshi and Pierre Seguin COMP 4601 Project'))
 
-router.get('/loc/*', (req, res) => { 
-    res.send(req.params[0]);
-});
+router.get('/update', (req, res) => {    
+  let parser = new CSVParser(`${__dirname}/../../data/Parking_Tags_data_2015_1.csv`);
 
-router.get('/update', (req, res) => {
-    //crawl the dataset
-    let cr = new Crawler(() => res.json({success:true})).addToQueue('https://www.toronto.ca/ext/open_data/catalog/delivery/open_data_catalog.json');
-    //extract and clean addresses from csv
-    let parser = new CSVParser('./data/Parking_Tags_data_2015_1.csv');
-    parser._parse((addresses)=>{
-    /*TODO*/
-    //store addresses with ticket amount and average price to the database
-    });
+  parser.parse(async addr => {
+    for (let address of Object.keys(addr)) {
+      let totalPrice = 0;
+      let avgPrice = 0;
 
-    /*TODO*/
-    //find all lat longs of addresses in database and store them alonside in the db
+      for (let keys of Object.keys(addr[address])) {
+        let fullAddress = `${keys} ${address}`;
 
+        let prices = addr[address][keys];
+        for (let price of prices) {
+          totalPrice += parseInt(price);
+        }
+        
+        avgPrice = totalPrice / prices.length;
+
+        try {
+          let result = await Dbi.saveLocation(fullAddress, avgPrice, prices.length);
+        } catch (err) { console.log(err); }
+      }
+    }
+  });
 });
 
 router.get('/price/*/*', (req, res) => {

@@ -1,22 +1,20 @@
 const DB_CONFIG = require('../config/db');
 const sqlite = require('sqlite3').verbose();
+const Mapbox = require('../models/Mapbox');
 
-// MongoDB Singleton
+// DB Singleton
 class DBInterface {
   constructor() {
     if(!DBInterface.instance) {
       this._db = new sqlite.Database(`${__dirname}/prod.db`, sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE, err => {
         if (err) throw err.message;
 
+        this.requester = new Mapbox();
         console.log('DB Connection established');
-      })
+      });
 
       DBInterface.instance = this;
     }
-  }
-
-  initDB() {
-    // call this function to set up the initial tables
   }
 
   closeConnection() {
@@ -25,10 +23,6 @@ class DBInterface {
 
       console.log(`DB Connection closed successfully`);
     });
-  }
-
-  dropDB() {
-    // call this function to drop the whole database
   }
   
   // does my file exist
@@ -58,6 +52,34 @@ class DBInterface {
           });
         }
       } catch (err) { reject(err); }
+    });
+  }
+
+  // save address as coords to the database
+  saveLocation(address, price, tickets) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT * FROM Addresses WHERE Address=(?)`;
+      this._db.get(SQL, [address], async (err, row) => {
+        if (err) reject(err);
+        
+        // if the address does not exist
+        if (!row) {
+          try {
+            let coords = await this.requester.getForwardGeoLocation(address);
+            const lat = coords['1'];
+            const long = coords['0'];
+            
+            const SQL = `INSERT INTO Addresses VALUES ((?), (?), (?), (?), (?))`;
+            this._db.run(SQL, [address, lat, long, price, tickets], err => {
+              if (err) reject(err);
+
+              resolve(true);
+            });
+          } catch (err) { reject({success : false, err : err}); }
+        } else {
+          reject({success : false, message: 'Address already exists'});
+        }
+      });
     });
   }
 }
