@@ -3,9 +3,10 @@ const querystring = require('querystring');
 const { ACCESS_TOKEN } = require('../config/mapbox');
 
 class MapBox {
-  constructor(ACCESS_TOKEN) {
+  constructor() {
     this._baseUrl = `https://api.mapbox.com/geocoding/v5/`;
     this.ACCESS_TOKEN = ACCESS_TOKEN;
+    this.city = `%2C%20toronto`;
     this.country = `ca`;
     this.limit = 1;
   }
@@ -14,7 +15,7 @@ class MapBox {
   _constructFullUrl(type, query) {
     switch (type) {
       case `GEO_FORWARD`:
-        return `${this._baseUrl}mapbox.places/${query}.json?access_token=${this.ACCESS_TOKEN}&country=${this.country}&limit=${this.limit}`;
+        return `${this._baseUrl}mapbox.places/${query}${this.city}.json?access_token=${this.ACCESS_TOKEN}&country=${this.country}&limit=${this.limit}`;
     
       default:
         break;
@@ -23,12 +24,19 @@ class MapBox {
   }
 
   // get co-ordinates from address
-  async getForwardGeoLocation(address) {
+  getForwardGeoLocation(address) {
     const url = this._constructFullUrl('GEO_FORWARD', querystring.stringify({query : address}));
 
-    try {
-      const { data } = await axios.default.get(url);      
-      return data.features[0].center;
-    } catch (err) { throw err; }
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { data } = await axios.default.get(url);
+        if (data.features.length !== 0)
+          resolve({...data.features[0].center});
+        
+        reject(`Location does not exist`);
+      } catch (err) { reject(err); }
+    });
   }
 }
+
+module.exports = MapBox;
