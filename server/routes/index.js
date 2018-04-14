@@ -1,9 +1,9 @@
 const express = require('express');
-const router = express.Router();
-
 const Crawler = require('../models/Crawler');
 const CSVParser = require('../models/CSVParser');
 const UserBasedCF = require('../algo/UserBasedCF');
+const CoordinateManager = require('../models/CoordinateManager');
+const router = express.Router();
 const Dbi = require('../db/Dbi');
 
 router.get('/', (req, res) => res.send('Awais Qureshi and Pierre Seguin COMP 4601 Project'))
@@ -34,71 +34,52 @@ router.get('/update', (req, res) => {
   });
 });
 
-router.get('/price/*/*', (req, res) => {
+router.get('/price/*/*', async (req, res) => {
     //determine which lat and long the request belongs to
-    let numberOfQuadrants = 4;
-    let testLats  = [ -45.03879723, -45.07228457, -45.0932857, -45.1433982, -45.243987];
-    let testLongs = [ 75.032837497,   75.023432657,   75.144156753,  75.524823729, 75.824823729];
+    let numberOfQuadrants = 3;
+    try{
+      let testCoords  = await Dbi.getCoordinates();//[ {lat:-45.03879723, long:75.032837497}, {lat:-45.07228457,long:75.023432657}, {lat:-45.0932857,long:75.144156753}, {lat:-45.1433982,long:75.524823729}, {lat:-45.243987,long:75.824823729}];
+      console.log(testCoords);
+      let coordMan = new CoordinateManager();
+      coordMan.setQuadrantsCoordinates(testCoords, numberOfQuadrants);
+      let userLat = coordMan.getLatIndex(req.params[0]);
+      let userLong = coordMan.getLongIndex(req.params[1]);
+      
+      if (userLat === -1 || userLong === -1){
+        return res.json({success:false, message:'coordinate was out of range'});
+      }
+  
+      let matrix = [];
+      for (let i = 0; i < coordMan.lats.length-1; i++) {
+        matrix[i] = [];
+        for (let j = 0; j < coordMan.longs.length-1; j++)
+          matrix[i][j] = -1;
+      }
+      for (let i = 0; i < coordMan.lats.length-1; i++)
+        for (let j = 0; j < coordMan.longs.length-1; j++){
+          let tickets = await Dbi.getTicketNumberForQuadrant(coordMan.lats[i],coordMan.lats[i+1], coordMan.longs[j], coordMan.longs[j+1]);
+          if(tickets != 0)
+            matrix[i][j] += tickets;
+        }
     
-    let lats        = [];
-    let longs       = [];
-    let minLat      = getMin(testLats);
-    let maxLat      = getMax(testLats);
-    let minLong     = getMin(testLongs);
-    let maxLong     = getMax(testLongs);
-    console.log(minLong);
-    let latFactor   = (maxLat - minLat)/(numberOfQuadrants - 1);
-    let longFactor  = (maxLong - minLong)/(numberOfQuadrants - 1);
-    
-    for(let i = 0; i < numberOfQuadrants; i++) {
-        lats[i]  = minLat  + latFactor  * (i);
-        longs[i] = minLong + longFactor * (i);
+  
+  
+  
+      // for(let coordinate of testCoords) {
+      //     let weight = 1;//request the database for the number of tickets issued at the location / the cost of tickets at the location
+      //     console.log(coordinate + ", " + coordMan.getLatIndex(coordinate.Lat) + " : " + coordMan.getLongIndex(coordinate.Long));
+      //     matrix[coordMan.getLatIndex(coordinate.Lat)][coordMan.getLongIndex(coordinate.Long)] += await Dbi.getTicketNumberForQuadrant();
+      // }
+      // console.log(matrix);
+  
+      let uCF = new UserBasedCF(matrix); 
+      let weight = uCF._computeUserBasedPrediction(userLat,userLong);
+      return res.json({success:true, value:weight});
     }
-    console.log(longs);
-    let userLat = req.params[0];
-    let userLong = req.params[1];
-    let userLatIndex = -1;
-    let userLongIndex = -1;
-     for(let i = 0; i<lats.length-1; i++)
-         if (lats[i] < userLat && lats[i+1] > userLat)
-             userLatIndex = i+1;
-
-     for(let i = 0; i<longs.length-1; i++)
-         if (longs[i] < userLong && longs[i+1] > userLong)
-             userLongIndex = i+1;
-    console.log(userLatIndex+" "+userLongIndex);
-    if (userLatIndex === -1 || userLongIndex === -1){
-        res.send('The points defined are out of the scope that\'s analyzed');
-        return;
+    catch(err){
+      console.log(err);
     }
 
-
-    let matrix = [  [200,  40,  -1, 50 ],
-                    [ 30, 164,  80, 30 ],
-                    [162,  -1,  -1, 32 ],
-                    [ 44,  32,  83, 120] 
-                ]; 
-    let uCF = new UserBasedCF(matrix); 
-    let weight = uCF._computeUserBasedPrediction(userLatIndex,userLongIndex);
-    res.send(String(weight));
 });
-let getMin = (numbers) => {
-    let min = Number.MAX_VALUE
-    for(let j of numbers)
-        if(min > j)
-            min = j;
-    return min;
-}
-
-let getMax = (numbers) => {
-    let max = -Number.MAX_VALUE;
-    for(let j of numbers){
-        if(max < j)
-            max = j;
-    }
-    return max;
-}
-
-
 
 module.exports = router;

@@ -82,6 +82,45 @@ class DBInterface {
       });
     });
   }
+  getCoordinates() {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT * FROM Addresses`;
+      this._db.run(SQL, [], async (err, rows) => {
+        if (err) reject(err);
+        console.log(rows.length);
+        resolve(rows);
+      });
+    });
+  }
+
+  getCoordinates(minLat, maxLat, minLong, maxLong) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
+      this._db.all(SQL, [maxLat, minLat, maxLong, minLong], async (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  }
+  getTicketNumberForQuadrant(minLat, maxLat, minLong, maxLong) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT SUM(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
+      this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+  }
+
+    getPriceAVGForQuadrant(minLat, maxLat, minLong, maxLong) {
+      return new Promise((resolve, reject) => {
+        const SQL = `SELECT AVG(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
+        this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
+          if (err) reject(err);
+          resolve(row);
+        });
+      });
+  }
 }
 
 const instance = new DBInterface();
