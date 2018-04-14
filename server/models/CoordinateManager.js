@@ -5,23 +5,24 @@ class CoordinateManager {
         this.longs = [];
     }
 
-    setQuadrantsCoordinates(newCoord, numberOfQuadrants) {
+    setQuadrantsCoordinatesFromDataset(newCoord, numberOfQuadrants) {
         this.lats = [];
         this.longs = [];
-        let minLat      = this._getMin(newCoord, 'lat');
-        let maxLat      = this._getMax(newCoord, 'lat');
-        let minLong     = this._getMin(newCoord, 'long');
-        let maxLong     = this._getMax(newCoord, 'long');
-        console.log(minLat + " " + maxLat);
-        console.log(minLong + " " + maxLong);
+        let minLat      = this._getMin(newCoord, 'Lat');
+        let maxLat      = this._getMax(newCoord, 'Lat');
+        let minLong     = this._getMin(newCoord, 'Long');
+        let maxLong     = this._getMax(newCoord, 'Long');
+        // console.log(minLat + " " + maxLat);
+        // console.log(minLong + " " + maxLong);
         
         let latFactor   = (maxLat - minLat)/(numberOfQuadrants - 1);
         let longFactor  = (maxLong - minLong)/(numberOfQuadrants - 1);
+
         this.initLats(minLat, latFactor, numberOfQuadrants);
         this.initLongs(minLong, longFactor, numberOfQuadrants);       
     }
 
-    setQuadrantsCoordinates(minLat, maxLat, minLong, maxLong, numberOfQuadrants) {
+    setQuadrantsCoordinatesFromBoundaries(minLat, maxLat, minLong, maxLong, numberOfQuadrants) {
         this.lats = [];
         this.longs = [];
         let latFactor   = (maxLat - minLat)/(numberOfQuadrants - 1);
