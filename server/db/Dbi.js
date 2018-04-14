@@ -82,18 +82,20 @@ class DBInterface {
       });
     });
   }
+
   getCoordinates() {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses`;
-      this._db.run(SQL, [], async (err, rows) => {
+      
+      this._db.all(SQL, [], (err, rows) => {
         if (err) reject(err);
-        console.log(rows.length);
+        
         resolve(rows);
       });
     });
   }
 
-  getCoordinates(minLat, maxLat, minLong, maxLong) {
+  getCoordinatesWithinRange(minLat, maxLat, minLong, maxLong) {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
       this._db.all(SQL, [maxLat, minLat, maxLong, minLong], async (err, rows) => {

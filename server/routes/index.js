@@ -38,8 +38,7 @@ router.get('/price/*/*', async (req, res) => {
     //determine which lat and long the request belongs to
     let numberOfQuadrants = 3;
     try{
-      let testCoords  = await Dbi.getCoordinates();//[ {lat:-45.03879723, long:75.032837497}, {lat:-45.07228457,long:75.023432657}, {lat:-45.0932857,long:75.144156753}, {lat:-45.1433982,long:75.524823729}, {lat:-45.243987,long:75.824823729}];
-      console.log(testCoords);
+      let testCoords = await Dbi.getCoordinates();
       let coordMan = new CoordinateManager();
       coordMan.setQuadrantsCoordinates(testCoords, numberOfQuadrants);
       let userLat = coordMan.getLatIndex(req.params[0]);
