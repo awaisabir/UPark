@@ -3,6 +3,7 @@ const Crawler = require('../models/Crawler');
 const CSVParser = require('../models/CSVParser');
 const UserBasedCF = require('../algo/UserBasedCF');
 const CoordinateManager = require('../models/CoordinateManager');
+const Sector = require('../models/Sector');
 const router = express.Router();
 const Dbi = require('../db/Dbi');
 
@@ -34,48 +35,53 @@ router.get('/update', (req, res) => {
   });
 });
 
-router.get('/price/*/*', async (req, res) => {
-    //determine which lat and long the request belongs to
-    let numberOfQuadrants = 3;
+router.get('/best/*/*', async (req, res) => {
+
+    let numberOfQuadrants = 10;
     try{
       let testCoords = await Dbi.getCoordinates();
       let coordMan = new CoordinateManager();
-      coordMan.setQuadrantsCoordinates(testCoords, numberOfQuadrants);
-      let userLat = coordMan.getLatIndex(req.params[0]);
-      let userLong = coordMan.getLongIndex(req.params[1]);
+      let userLat = parseFloat(req.params[0]);
+      let userLong = parseFloat(req.params[1]);
       
-      if (userLat === -1 || userLong === -1){
+      //get the best sectors based on dataset
+      let s = new Sector(coordMan);
+      let matrices = await s.getBestMatrix(userLat,userLong,numberOfQuadrants);
+
+      //determine which quadrant lat and long
+      let userLatIndex = coordMan.getLatIndex(req.params[0]);
+      let userLongIndex = coordMan.getLongIndex(req.params[1]);
+      if (userLatIndex === -1 || userLongIndex === -1){
         return res.json({success:false, message:'coordinate was out of range'});
       }
-  
-      let matrix = [];
-      for (let i = 0; i < coordMan.lats.length-1; i++) {
-        matrix[i] = [];
-        for (let j = 0; j < coordMan.longs.length-1; j++)
-          matrix[i][j] = -1;
-      }
-      for (let i = 0; i < coordMan.lats.length-1; i++)
-        for (let j = 0; j < coordMan.longs.length-1; j++){
-          let tickets = await Dbi.getTicketNumberForQuadrant(coordMan.lats[i],coordMan.lats[i+1], coordMan.longs[j], coordMan.longs[j+1]);
-          if(tickets != 0)
-            matrix[i][j] += tickets;
-        }
-    
-  
-  
-  
-      // for(let coordinate of testCoords) {
-      //     let weight = 1;//request the database for the number of tickets issued at the location / the cost of tickets at the location
-      //     console.log(coordinate + ", " + coordMan.getLatIndex(coordinate.Lat) + " : " + coordMan.getLongIndex(coordinate.Long));
-      //     matrix[coordMan.getLatIndex(coordinate.Lat)][coordMan.getLongIndex(coordinate.Long)] += await Dbi.getTicketNumberForQuadrant();
-      // }
-      // console.log(matrix);
-  
-      let uCF = new UserBasedCF(matrix); 
-      let weight = uCF._computeUserBasedPrediction(userLat,userLong);
-      return res.json({success:true, value:weight});
-    }
-    catch(err){
+
+      //find predictions around the users sector
+      let priceCF = new UserBasedCF(matrices.priceMatrix); 
+      let ticketCF = new UserBasedCF(matrices.ticketMatrix); 
+      //determines area around the user's Sector
+      let regions = [{x:-1,y:1}, {x:0,y:1}, {x:1,y:1}, {x:-1,y:0}, {x:0, y:0}, {x:1,y:0}, {x:-1,y:-1}, {x:0,y:-1}, {x:1,y:-1}];
+      let topRegions = [];
+      //finds the average cost of each quadrant
+      for(let i = 0; i<regions.length; i++)
+        topRegions[i] = {
+          lat:coordMan.lats[i], 
+          long:coordMan.longs[i], 
+          price: priceCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
+          tickets: ticketCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
+        };
+      //finds the top 3 locations based on price and ticket number
+      let minVals = [0,0,0];
+      for(let i = 0; i < topRegions.length; i++)
+          for(let j = minVals.length-1; j >= 0 ; j--)
+            if(topRegions[minVals[j]].price/topRegions[minVals[j]].tickets > topRegions[i].price/topRegions[i].tickets) {
+              for(let k = minVals.length - 1; k > j; k--)
+                  minVals[k] = minVals[k-1];
+              minVals[j] = i;
+              break;
+            }
+      return res.json({success:true, value:[topRegions[minVals[0]], topRegions[minVals[1]], topRegions[minVals[1]]]});
+      
+    } catch(err){
       console.log(err);
     }
 

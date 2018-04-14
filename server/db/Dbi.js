@@ -106,10 +106,10 @@ class DBInterface {
   }
   getTicketNumberForQuadrant(minLat, maxLat, minLong, maxLong) {
     return new Promise((resolve, reject) => {
-      const SQL = `SELECT SUM(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
+      const SQL = `SELECT SUM(Tickets) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
       this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
         if (err) reject(err);
-        resolve(row);
+        resolve(row['SUM(Tickets)']);
       });
     });
   }
@@ -119,7 +119,7 @@ class DBInterface {
         const SQL = `SELECT AVG(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
         this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
           if (err) reject(err);
-          resolve(row);
+          resolve(row['AVG(Price)']);
         });
       });
   }
