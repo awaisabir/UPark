@@ -123,6 +123,27 @@ class DBInterface {
         });
       });
   }
+
+  getLimitedAddressesInQuadrant(minLat, maxLat, minLong, maxLong, limit) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?) LIMIT (?)`;
+      this._db.all(SQL, [maxLat, minLat, maxLong, minLong, limit], async (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  }
+
+  getBestAddressInQuadrant(minLat, maxLat, minLong, maxLong) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)" +
+        "AND Price*Tickets =  (SELECT MIN(Price*Tickets) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)) LIMIT 1`;
+      this._db.get(SQL, [maxLat, minLat, maxLong, minLong, maxLat, minLat, maxLong, minLong], async (err, row) => {
+        if (err) reject(err);
+        resolve(row);
+      });
+    });
+  }
 }
 
 const instance = new DBInterface();
