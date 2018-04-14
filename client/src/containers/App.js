@@ -11,6 +11,7 @@ class App extends Component {
       lat : 43.6532,
       long : -79.3832,
       success : false,
+      locations: [],
       coords : [],
       fetched : false,
       err : {},
@@ -23,14 +24,13 @@ class App extends Component {
     const { lat, long } = this.state;
     (async () => {
       try {
-        let raw = await fetch(`http://localhost:3000/best/${lat}/${long}`);
+        let raw = await fetch(`http://localhost:3000/locations?lat=${lat}&long=${long}`);
         let response = await raw.json();
-  
+        
         const { value, success } = response;
-  
-        this.setState({fetched: true, coords: value, success, err: {}});
+        this.setState({fetched: true, locations: value, success, err: {}});
       } catch (err) {
-        this.setState({fetched: true, coords: [], success: false, err});
+        this.setState({fetched: true, success: false, err});
       }
     })();
   }
@@ -40,8 +40,7 @@ class App extends Component {
   }
 
   render() {
-    const { lat, long, coords } = this.state;
-
+    const { lat, long, coords, locations } = this.state;
     return (
       <Container className="App">
         <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
@@ -49,8 +48,10 @@ class App extends Component {
         <div className="map">
           <Mapbox 
             onMapClick={this.updateCoords}
+            locations={locations}
             coords={coords}
-            currentLocation={{lat, long}}
+            lat={lat}
+            long={long}
           />
         </div>
       </Container>

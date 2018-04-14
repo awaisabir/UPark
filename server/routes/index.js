@@ -99,12 +99,9 @@ router.get('/best/*/*', async (req, res) => {
     const longVal = parseFloat(long);
     try {
       
-      console.log(latVal + " " + longVal);
       let locations = await Dbi.getLimitedAddressesInQuadrant(latVal - area, latVal + area, longVal - area, latVal + area, 100);
-      console.log(locations);
       return res.json({success:true, value:locations});
     } catch(err) {
-      console.log(err);
       return res.json({success:false});
     }
   });
