@@ -35,7 +35,7 @@ router.get('/update', (req, res) => {
   });
 });
 
-router.get('/price/*/*', async (req, res) => {
+router.get('/best/*/*', async (req, res) => {
 
     let numberOfQuadrants = 10;
     try{
