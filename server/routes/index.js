@@ -3,6 +3,7 @@ const Crawler = require('../models/Crawler');
 const CSVParser = require('../models/CSVParser');
 const UserBasedCF = require('../algo/UserBasedCF');
 const CoordinateManager = require('../models/CoordinateManager');
+const queryString = require('querystring');
 const Sector = require('../models/Sector');
 const router = express.Router();
 const Dbi = require('../db/Dbi');
@@ -58,33 +59,54 @@ router.get('/best/*/*', async (req, res) => {
       //find predictions around the users sector
       let priceCF = new UserBasedCF(matrices.priceMatrix); 
       let ticketCF = new UserBasedCF(matrices.ticketMatrix); 
-      //determines area around the user's Sector
+
+      // //determines area around the user's Sector
       let regions = [{x:-1,y:1}, {x:0,y:1}, {x:1,y:1}, {x:-1,y:0}, {x:0, y:0}, {x:1,y:0}, {x:-1,y:-1}, {x:0,y:-1}, {x:1,y:-1}];
       let topRegions = [];
+
       //finds the average cost of each quadrant
-      for(let i = 0; i<regions.length; i++)
-        topRegions[i] = {
-          lat:coordMan.lats[i], 
-          long:coordMan.longs[i], 
-          price: priceCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
-          tickets: ticketCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
-        };
-      //finds the top 3 locations based on price and ticket number
-      let minVals = [0,0,0];
-      for(let i = 0; i < topRegions.length; i++)
-          for(let j = minVals.length-1; j >= 0 ; j--)
-            if(topRegions[minVals[j]].price/topRegions[minVals[j]].tickets > topRegions[i].price/topRegions[i].tickets) {
-              for(let k = minVals.length - 1; k > j; k--)
-                  minVals[k] = minVals[k-1];
-              minVals[j] = i;
-              break;
-            }
-      return res.json({success:true, value:[topRegions[minVals[0]], topRegions[minVals[1]], topRegions[minVals[1]]]});
+      for(let i = 0; i<regions.length; i++){
+        let best = await Dbi.getBestAddressInQuadrant(
+          coordMan.lats[i],
+          coordMan.lats[i+1],
+          coordMan.longs[i],
+          coordMan.longs[i+1]);
+        if(best != null)
+          topRegions[i] = best;
+        else
+          topRegions[i] = {
+              Lat:      coordMan.lats[i] - (coordMan.lats[i+1] - coordMan.lats[i])/2, 
+              Long:     coordMan.longs[i] - (coordMan.longs[i+1] - coordMan.longs[i])/2, 
+              Price:    priceCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
+              Tickets:  ticketCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
+              Address: ''
+          };
+      }
+      return res.json({success:true, value:topRegions});
       
     } catch(err){
       console.log(err);
+      return res.json({success:false});
     }
 
-});
+  });
+
+  router.get('/locations', async (req, res) => {
+    
+    const {lat,long} = req.query;
+    const area = 0.05;
+    const latVal = parseFloat(lat);
+    const longVal = parseFloat(long);
+    try {
+      
+      console.log(latVal + " " + longVal);
+      let locations = await Dbi.getLimitedAddressesInQuadrant(latVal - area, latVal + area, longVal - area, latVal + area, 100);
+      console.log(locations);
+      return res.json({success:true, value:locations});
+    } catch(err) {
+      console.log(err);
+      return res.json({success:false});
+    }
+  });
 
 module.exports = router;
