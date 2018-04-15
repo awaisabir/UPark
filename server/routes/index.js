@@ -94,12 +94,12 @@ router.get('/best/*/*', async (req, res) => {
   router.get('/locations', async (req, res) => {
     
     const {lat,long} = req.query;
-    const area = 0.05;
+    const area = 0.01;
     const latVal = parseFloat(lat);
     const longVal = parseFloat(long);
     try {
       
-      let locations = await Dbi.getLimitedAddressesInQuadrant(latVal - area, latVal + area, longVal - area, latVal + area, 100);
+      let locations = await Dbi.getLimitedAddressesInQuadrant(latVal - area, latVal + area, longVal - area, longVal + area, 100);
       return res.json({success:true, value:locations});
     } catch(err) {
       return res.json({success:false});
