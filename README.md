@@ -2,6 +2,8 @@
 
 <div align="center"><img alt="logo" src="https://github.com/awaisabir/COMP4601-Project/blob/master/client/src/assets/logo.png" /></div>
 
+A web app (and future mobile app) that predicts the best possible locations for parking based on your current location and  previously ticketed locations around you from the Open Data Catalogue of Parking Tickets, in the City of Toronto.
+
 - Crawled data from the [Open Data Catalogue](https://www.toronto.ca/city-government/data-research-maps/open-data/open-data-catalogue/#75d14c24-3b7e-f344-4412-d8fd41f89455) for Parking Ticket Data and parsed using a [Web Crawler] (https://github.com/bda-research/node-crawler), saving the associated Excel Files in the filesystem.
 
 - Parsed address from Excel files using a custom [CSV Parser](https://github.com/awaisabir/COMP4601-Project/blob/master/server/models/CSVParser.js) that reduces the number of requests needed to make to Mapbox by grouping nearby addresses together and exports data as a JSON object.
