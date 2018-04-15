@@ -17,4 +17,4 @@ A web app (and future mobile app) that predicts the best possible locations for 
 
 - Based on a longitude and latitude passed in the best 9 computed locations are returned to the user and displayed on a map hosted by [Mapbox](https://github.com/alex3165/react-mapbox-gl) on the [frontend](https://github.com/awaisabir/COMP4601-Project/tree/master/client/src).
 
-#### Created by [Pierre Seguin](https://github.com/pseguin2011) and [awaisabir](https://github.com/awaisabir)
+#### Created by [pseguin2011](https://github.com/pseguin2011) and [awaisabir](https://github.com/awaisabir)
