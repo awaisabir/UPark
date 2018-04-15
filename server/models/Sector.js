@@ -28,9 +28,9 @@ class Sector {
             try {
                 //sets initial constants
                 let goodMatrix = false;
-                let factor = 0.05;
-                let minLat = lat - 0.05, maxLat = lat + 0.05;
-                let minLong = long -0.05, maxLong = long + 0.05;
+                let factor = 0.009;
+                let minLat = lat - factor, maxLat = lat + factor;
+                let minLong = long - factor, maxLong = long + factor;
                 let iterations = 1;
                 let bounds = 0.7;
                 while (!goodMatrix){
@@ -60,13 +60,12 @@ class Sector {
                             goodMatrix = true;
                         } else {
                             //recomputer the constants
-                            factor = (factor + 0.001) %0.1;
+                            factor = (factor + 0.001);
                             minLat = lat - factor, maxLat = lat + factor;
                             minLong = long - factor, maxLong = long + factor;
                             if(iterations++%20 == 0){
                                 bounds -= 0.05;
-                                minLat  = lat - 0.05, maxLat = lat + 0.05;
-                                minLong = long -0.05, maxLong = long + 0.05;
+                                factor = 0.05;
                             }
                         }
                 }
