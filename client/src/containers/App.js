@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Header, Button, Loader, Modal } from 'semantic-ui-react';
+import logo from '../assets/logo.png';
 import '../styles/App.css';
 
 import Mapbox from '../components/Mapbox';
@@ -108,7 +109,8 @@ class App extends Component {
 
     return (
       <Container className="App">
-      <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
+      <img alt="logo" style={{maginTop: '10px'}} src={logo} height="100px" width="100px" />
+      <Header className="title" as='h1'>U PARK</Header>
       <p><strong>Latitude: </strong>{lat}, <strong>Longitude: </strong>{long}</p>
       <div className="map">
         {fetching ? <Loader style={{marginBottom: '10px'}} active inline='centered' /> : null}

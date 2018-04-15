@@ -9,13 +9,11 @@ const Map = ReactMapboxGl({
 export default class Mapbox extends Component {
   render() {
     const { 
-      onMarkerClick, 
-      onMapClick, 
-      coords, 
-      currentLocation, 
-      locations, 
-      lat, 
-      long 
+      onMarkerClick,
+      onMapClick,
+      locations,
+      lat,
+      long
     } = this.props;
 
     return (
