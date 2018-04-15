@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Header, Button } from 'semantic-ui-react';
+import { Container, Header, Button, Dimmer, Loader, Image, Segment } from 'semantic-ui-react';
 import '../styles/App.css';
 
 import Mapbox from '../components/Mapbox';
@@ -19,40 +19,42 @@ class App extends Component {
       err : {},
     };
 
-    this.onMapClick = this.onMapClick.bind(this);
+    this.onMapClick    = this.onMapClick.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
+    this.onButtonClick = this.onButtonClick.bind(this);
   }
 
   componentDidMount() {
     const { lat, long } = this.state;
-    (async () => {
+    this.setState({fetching: true}, async () => {
       try {
         let raw = await fetch(`http://localhost:3000/locations?lat=${lat}&long=${long}`);
         let response = await raw.json();
         
         const { value, success } = response;
-        this.setState({fetched: true, locations: value, success, err: {}});
+        this.setState({fetched: true, fetching: false, locations: value, success, err: {}});
       } catch (err) {
-        this.setState({fetched: true, success: false, err});
+        this.setState({fetched: true, fetching: false, success: false, err});
       }
-    })();
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { lat, long } = prevState;
     
-    if (this.state.late !== lat || this.state.long !== long) {
-      (async () => {
+    if (this.state.lat !== lat || this.state.long !== long) {
+      this.setState({fetching : true}, async () => {
         try {
           let raw = await fetch(`http://localhost:3000/locations?lat=${this.state.lat}&long=${this.state.long}`);
           let response = await raw.json();
 
           const { value, success } = response;
-          this.setState({fetched: true, locations: value, success, err: {}});
+            
+          this.setState({fetched: true, fetching: false, locations: value, success, err: {}});
         } catch (err) {
-          this.setState({fetched: true, success: false, err});
+          this.setState({fetched: true, fetching: false, success: false, err});
         }
-      })();
+      });
     }   
   }
 
@@ -62,14 +64,29 @@ class App extends Component {
   }
 
   onMarkerClick(location) {
-    console.log(location)
     this.setState({location});
   }
 
+  async onButtonClick() {
+    this.setState({fetching : true}, async () => {
+      try {
+        let raw = await fetch(`http://localhost:3000/best/${this.state.lat}/${this.state.long}`);
+        let response = await raw.json();
+        
+        const { value, success } = response;
+
+        this.setState({fetched: true, fetching: false, locations: value, success, err: {}});
+      } catch (err) {
+        this.setState({fetched: true, fetching: false, success: false, err});
+      }
+    });
+  }
+
   render() {
-    const { lat, long, coords, locations, location } = this.state;
+    const { lat, long, coords, locations, location, fetching } = this.state;
     return (
       <Container className="App">
+        {fetching ? 'Loading?...' : null}
         <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
         <p><strong>Latitude: </strong>{lat}, <strong>Longitude: </strong>{long}</p>
         <div className="map">
@@ -81,7 +98,12 @@ class App extends Component {
             lat={lat}
             long={long}
           />
-        <Button style={{marginTop: '20px'}} text='Best Locations'>Get Best Locations</Button>
+        <Button 
+          style={{marginTop: '20px'}} 
+          text='Best Locations'
+          onClick={() => this.onButtonClick()}
+        >
+          Get Best Locations</Button>
         </div>
       </Container>
     );
