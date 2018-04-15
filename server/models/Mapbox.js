@@ -2,7 +2,14 @@ const axios = require('axios');
 const querystring = require('querystring');
 const { ACCESS_TOKEN } = require('../config/mapbox');
 
+/**
+ * @class : Mapbox
+ */
 class MapBox {
+
+  /**
+   * @constructor : Initalizes url structure for calls to the Mapbox API
+   */
   constructor() {
     this._baseUrl = `https://api.mapbox.com/geocoding/v5/`;
     this.ACCESS_TOKEN = ACCESS_TOKEN;

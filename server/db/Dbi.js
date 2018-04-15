@@ -2,8 +2,15 @@ const DB_CONFIG = require('../config/db');
 const sqlite = require('sqlite3').verbose();
 const Mapbox = require('../models/Mapbox');
 
-// DB Singleton
+/**
+ * @class : DBInterface
+ */
 class DBInterface {
+  
+  /**
+   * @constructor
+   * Sets up the Singleton for the SQL database and the requester for Mapbox
+   */
   constructor() {
     if(!DBInterface.instance) {
       this._db = new sqlite.Database(`${__dirname}/prod.db`, sqlite.OPEN_READWRITE | sqlite.OPEN_CREATE, err => {
@@ -17,6 +24,7 @@ class DBInterface {
     }
   }
 
+  // close connection
   closeConnection() {
     this._db.close(err => {
       if (err) throw err;
@@ -83,6 +91,7 @@ class DBInterface {
     });
   }
 
+  // get the addresses
   getCoordinates() {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses`;
@@ -98,7 +107,7 @@ class DBInterface {
   getCoordinatesWithinRange(minLat, maxLat, minLong, maxLong) {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
-      this._db.all(SQL, [maxLat, minLat, maxLong, minLong], async (err, rows) => {
+      this._db.all(SQL, [maxLat, minLat, maxLong, minLong], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
@@ -107,27 +116,27 @@ class DBInterface {
   getTicketNumberForQuadrant(minLat, maxLat, minLong, maxLong) {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT SUM(Tickets) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
-      this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
+      this._db.get(SQL, [maxLat, minLat, maxLong, minLong], (err, row) => {
         if (err) reject(err);
         resolve(row['SUM(Tickets)']);
       });
     });
   }
 
-    getPriceAVGForQuadrant(minLat, maxLat, minLong, maxLong) {
-      return new Promise((resolve, reject) => {
-        const SQL = `SELECT AVG(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
-        this._db.get(SQL, [maxLat, minLat, maxLong, minLong], async (err, row) => {
-          if (err) reject(err);
-          resolve(row['AVG(Price)']);
-        });
+  getPriceAVGForQuadrant(minLat, maxLat, minLong, maxLong) {
+    return new Promise((resolve, reject) => {
+      const SQL = `SELECT AVG(Price) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)`;
+      this._db.get(SQL, [maxLat, minLat, maxLong, minLong], (err, row) => {
+        if (err) reject(err);
+        resolve(row['AVG(Price)']);
       });
+    });
   }
 
   getLimitedAddressesInQuadrant(minLat, maxLat, minLong, maxLong, limit) {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?) LIMIT (?)`;
-      this._db.all(SQL, [maxLat, minLat, maxLong, minLong, limit], async (err, rows) => {
+      this._db.all(SQL, [maxLat, minLat, maxLong, minLong, limit], (err, rows) => {
         if (err) reject(err);
         resolve(rows);
       });
@@ -137,7 +146,7 @@ class DBInterface {
   getBestAddressInQuadrant(minLat, maxLat, minLong, maxLong) {
     return new Promise((resolve, reject) => {
       const SQL = `SELECT * FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?) AND Price*Tickets = (SELECT MIN(Price*Tickets) FROM Addresses WHERE Lat < (?) AND Lat > (?) AND Long < (?) AND Long > (?)) LIMIT 1`;
-      this._db.get(SQL, [maxLat, minLat, maxLong, minLong, maxLat, minLat, maxLong, minLong], async (err, row) => {
+      this._db.get(SQL, [maxLat, minLat, maxLong, minLong, maxLat, minLat, maxLong, minLong], (err, row) => {
         if (err) reject(err);
         resolve(row);
       });

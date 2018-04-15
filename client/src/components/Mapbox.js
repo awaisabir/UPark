@@ -21,16 +21,11 @@ export default class Mapbox extends Component {
     return (
       <Map
         style="mapbox://styles/mapbox/streets-v9"
-        containerStyle={{
-          height: "500px",
-          width: "100%"
-        }}
+        containerStyle={{height: "500px", width: "100%"}}
         center={[long, lat]}
         onClick={onMapClick}
       >
-        <Marker 
-          coordinates={[long, lat]}
-        >
+        <Marker coordinates={[long, lat]}>
           <img alt="your-location" height="30px" width="30px" src={"https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-256.png"}/>
         </Marker>
 

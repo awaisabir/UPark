@@ -41,19 +41,20 @@ class CoordinateManager {
         }
     }
 
-
     getLatIndex(userLat) {
         for(let i = 0; i<this.lats.length-1; i++)
             if (this.lats[i] <= userLat && this.lats[i+1] >= userLat)
                 return i;
         return -1;
     }
+
     getLongIndex(userLong) {
         for(let i = 0; i<this.longs.length-1; i++)
             if (this.longs[i] <= userLong && this.longs[i+1] >= userLong)
                 return i;
         return -1;
     }
+    
     _getMin (numbers, key) {
         let min = Number.MAX_VALUE
         for(let j of numbers)

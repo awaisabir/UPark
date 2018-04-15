@@ -72,7 +72,7 @@ class App extends Component {
     });
   }
 
-  async onButtonClick() {
+  onButtonClick() {
     this.setState({fetching : true}, async () => {
       try {
         let raw = await fetch(`http://localhost:3000/best/${this.state.lat}/${this.state.long}`);
@@ -120,12 +120,11 @@ class App extends Component {
             lat={lat}
             long={long}
           />
-        <Button 
-          style={{marginTop: '20px'}} 
-          text='Best Locations'
-          onClick={() => this.onButtonClick()}
-        >
-          Get Best Locations</Button>
+          <Button style={{marginTop: '20px'}} 
+            onClick={() => this.onButtonClick()}
+          >
+            Get Best Locations
+          </Button>
         </div>
 
         {/** Modal Setup **/}
