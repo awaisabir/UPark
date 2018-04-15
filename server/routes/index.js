@@ -61,26 +61,31 @@ router.get('/best/*/*', async (req, res) => {
       let ticketCF = new UserBasedCF(matrices.ticketMatrix); 
 
       // //determines area around the user's Sector
-      let regions = [{x:-1,y:1}, {x:0,y:1}, {x:1,y:1}, {x:-1,y:0}, {x:0, y:0}, {x:1,y:0}, {x:-1,y:-1}, {x:0,y:-1}, {x:1,y:-1}];
+      let regions = [{x:-1,y:-1}, {x:0,y:0}, {x:1,y:1}];
       let topRegions = [];
 
       //finds the average cost of each quadrant
-      for(let i = 0; i<regions.length; i++){
-        let best = await Dbi.getBestAddressInQuadrant(
-          coordMan.lats[i],
-          coordMan.lats[i+1],
-          coordMan.longs[i],
-          coordMan.longs[i+1]);
-        if(best != null)
-          topRegions[i] = best;
-        else
-          topRegions[i] = {
-              Lat:      coordMan.lats[i] - (coordMan.lats[i+1] - coordMan.lats[i])/2, 
-              Long:     coordMan.longs[i] - (coordMan.longs[i+1] - coordMan.longs[i])/2, 
-              Price:    priceCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
-              Tickets:  ticketCF._computeUserBasedPrediction(userLatIndex + regions[i].x,userLongIndex + regions[i].y),
-              Address: ''
-          };
+      let total = 0;
+      let middle = Math.round(coordMan.lats.length/2)
+      for(let i = middle - 1, a = 0; i < middle + 1, a < 3; i++, a++){
+        for(let j = middle - 1, b = 0; j < middle + 1, b < 3; j++, b++){
+          let best = await Dbi.getBestAddressInQuadrant(
+            coordMan.lats[i],
+            coordMan.lats[i+1],
+            coordMan.longs[j],
+            coordMan.longs[j+1]);
+          if(best != null)
+            topRegions[total] = best;
+          else
+            topRegions[total] = {
+                Lat:      coordMan.lats[i] - (coordMan.lats[i+1] - coordMan.lats[i])/2, 
+                Long:     coordMan.longs[j] - (coordMan.longs[j+1] - coordMan.longs[j])/2, 
+                Price:    priceCF._computeUserBasedPrediction(userLatIndex + regions[a].x,userLongIndex + regions[a].y),
+                Tickets:  ticketCF._computeUserBasedPrediction(userLatIndex + regions[b].x,userLongIndex + regions[b].y),
+                Address: ''
+            };
+            total ++;
+          }
       }
       return res.json({success:true, value:topRegions});
       
