@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Header, Button, Dimmer, Loader, Image, Segment } from 'semantic-ui-react';
+import { Container, Header, Button, Loader, Modal } from 'semantic-ui-react';
 import '../styles/App.css';
 
 import Mapbox from '../components/Mapbox';
@@ -16,12 +16,15 @@ class App extends Component {
       coords : [],
       fetched : false,
       fetching : true,
+      open : false,
       err : {},
     };
 
     this.onMapClick    = this.onMapClick.bind(this);
     this.onMarkerClick = this.onMarkerClick.bind(this);
     this.onButtonClick = this.onButtonClick.bind(this);
+    this.show          = this.show.bind(this);
+    this.close         = this.close.bind(this);
   }
 
   componentDidMount() {
@@ -64,7 +67,9 @@ class App extends Component {
   }
 
   onMarkerClick(location) {
-    this.setState({location});
+    this.setState({location}, () => {
+      this.show('mini');
+    });
   }
 
   async onButtonClick() {
@@ -82,14 +87,31 @@ class App extends Component {
     });
   }
 
+  show (size) {
+    this.setState({ size, open: true });
+  }
+
+  close() {
+    this.setState({open: false});
+  }
+
   render() {
-    const { lat, long, coords, locations, location, fetching } = this.state;
+    const { 
+      lat, 
+      long, 
+      coords, 
+      locations, 
+      location, 
+      fetching, 
+      open, 
+      size } = this.state;
+
     return (
       <Container className="App">
-        {fetching ? 'Loading?...' : null}
-        <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
-        <p><strong>Latitude: </strong>{lat}, <strong>Longitude: </strong>{long}</p>
-        <div className="map">
+      <Header className="title" as='h1'>COMP 4601 Final Term Project</Header>
+      <p><strong>Latitude: </strong>{lat}, <strong>Longitude: </strong>{long}</p>
+      <div className="map">
+        {fetching ? <Loader style={{marginBottom: '10px'}} active inline='centered' /> : null}
           <Mapbox
             onMapClick={this.onMapClick}
             onMarkerClick={this.onMarkerClick}
@@ -105,6 +127,17 @@ class App extends Component {
         >
           Get Best Locations</Button>
         </div>
+
+        {/** Modal Setup **/}
+        <Modal size={size} open={open} onClose={this.close}>
+          <Modal.Header>
+            {location !== '' ? location.Address : "N/A"}
+          </Modal.Header>
+          <Modal.Content>
+            <p><strong>Average Price: </strong>{location.Price}</p>
+            <p><strong># of Tickets: </strong>{location.Tickets}</p>
+          </Modal.Content>
+        </Modal>
       </Container>
     );
   }
