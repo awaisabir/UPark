@@ -5,16 +5,12 @@
 ```
   .
   +-- src
-      +-- actions
-          +-- index.js
-          +-- ... all other actions
       +-- assets
           +-- ... all img/svg files
       +-- containers
           +-- ... all containers
-      +-- reducers
-          +-- index.js
-          +-- ... all reducers
+      +-- components
+          +-- ... all presentational components
       +-- styles
           +-- ... all styles
       +-- index.js (bootstrap react project)
